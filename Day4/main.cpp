@@ -5,6 +5,8 @@
 #include <fstream>
 #include <unordered_map>
 #include <bits/stdc++.h>
+#include <algorithm>
+#include <numeric>
 #include <math.h>
 
 using namespace std;
@@ -50,6 +52,22 @@ pair<string, string> parseNumbers(string str) {
     return numbers;
 }
 
+void addCards(int points, vector<int> &copies, int currentIndex, int nCards){
+    if(points == 0){
+        if(currentIndex >= copies.size()){
+            copies.push_back(1);
+        } 
+        return;
+    } else {
+        if(currentIndex >= copies.size()){
+            copies.push_back(nCards + 1);
+        } else {
+            copies[currentIndex] += nCards;
+        }
+        addCards(points - 1, copies, currentIndex + 1, nCards);
+    }
+}
+
 int main()
 {
     std::ifstream infile("input.txt");
@@ -59,7 +77,8 @@ int main()
 
     int res = 0;
     string line;
-
+    std::vector<int> copies {1};
+    int currentCard {0};
     while (getline(infile, line)) {
         string token;
         istringstream str(line);
@@ -68,11 +87,17 @@ int main()
             auto r = parseNumbers(token);
             auto r_ = getCard(r);
             auto points = getCardPoints(r_.first, r_.second);
+            addCards(points, copies, currentCard + 1, copies[currentCard]);
+            currentCard++;
             if (points)
                 res += pow(2, points -1);
         }
+
     }
     
-    cout << res << endl;
+    for_each(copies.begin(), copies.end(), [](int i){cout << i << endl;});
+    int res2 {std::reduce(copies.begin(), copies.end() - (copies.size() - currentCard), 0)};
+    cout << res << " " << res2 << endl;
     return 0;
+
 }
