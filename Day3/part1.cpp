@@ -2,21 +2,9 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <fstream>
+
 using namespace std;
-
-
-std::vector<std::string> getLines(std::string& str){
-   std::vector<std::string> lines {};
-   size_t pos {0};
-   std::string token;
-   while((pos = str.find("\n")) != std::string::npos){
-      token = str.substr(0, pos);
-      lines.push_back(token);
-      str.erase(0, pos + 1);
-   }
-   lines.push_back(str);
-   return lines;
-}
 
 std::vector<std::pair<size_t, size_t>> getCoordinates(std::string str){
     size_t first = 0;
@@ -33,6 +21,7 @@ std::vector<std::pair<size_t, size_t>> getCoordinates(std::string str){
             if(lastDigit){
                 last = i - 1;
                 std::pair<size_t, size_t> p {first, last};
+                cout << p.first << "\t" << p.second << endl;
                 res.push_back(p);
                 lastDigit = false;
             } 
@@ -43,7 +32,7 @@ std::vector<std::pair<size_t, size_t>> getCoordinates(std::string str){
         std::pair<size_t, size_t> p {first, last};
         res.push_back(p);
     }
-
+    cout << endl;
     return res;
 }
 
@@ -70,7 +59,7 @@ bool leftCheck(std::vector<std::string> lines, size_t line, pair<size_t, size_t>
 }
 
 bool rightCheck(std::vector<std::string> lines, size_t line, pair<size_t, size_t> coordinates){
-    if(coordinates.first < lines[0].size()){
+    if(coordinates.second < lines[0].size() - 1){
         if(line > 0){
             auto c = lines[line - 1][coordinates.second + 1];
             if(c != '.' && !isdigit(c) ){
@@ -115,18 +104,36 @@ bool botCheck(std::vector<std::string> lines, size_t line, pair<size_t, size_t> 
     return false;
 }
 bool check(std::vector<std::string> lines, size_t line, pair<size_t, size_t> coordinates){
-    return  topCheck(lines, line, coordinates)   || 
-            botCheck(lines, line, coordinates)   || 
-            rightCheck(lines, line, coordinates) || 
-            leftCheck(lines, line, coordinates); 
+    bool isTop = topCheck(lines, line, coordinates);  
+    bool isBot = botCheck(lines, line, coordinates); 
+    bool isRight = rightCheck(lines, line, coordinates); 
+    bool isLeft = leftCheck(lines, line, coordinates);
+    cout << "isTop: " << isTop << endl;
+    cout << "isBot: " << isBot << endl;
+    cout << "isRight: " << isRight << endl;
+    cout << "isLeft: " << isLeft << endl;
+    return isTop || isBot || isRight || isLeft;
 }
 
 
-int main(){
-    std::string str {"467..114..\n...*......\n..35..633.\n......#...\n617*......\n.....+.58.\n..592.....\n......755.\n...$.*....\n.664.598.."};
-    auto lines = getLines(str);
+int main() {
+    
+    std::ifstream infile("input.txt");
+    if (!infile.is_open()) {
+        return 0;
+    }
+
+    string line;
+    vector<string> lines; 
+    
+    while(getline(infile >> std::ws, line)) {
+        lines.push_back(line);
+    }
+    
     int res = 0;
     for(size_t i = 0; i < lines.size(); i++){
+        cout << "line : " << i << endl;
+        cout << lines[i] << endl;
         auto ns = getCoordinates(lines[i]);
         for(auto n : ns){
             if(check(lines, i, n)){
@@ -135,5 +142,5 @@ int main(){
             }
         }
     }
-    cout << res;  
+    cout << res << endl;  
 }
